@@ -8,11 +8,13 @@ from ..items import StartupItem
 class StartupSpider(scrapy.Spider):
     name = 'startup'
     allowed_domains = ['e27.co']
-    start_urls = ['https://e27.co/startups']
+    count = 0
+    COUNT_MAX = 500
 
-    def parse(self, response):
-        for page in range(1, 32):
-            url = response.url + '/load_startups_ajax?all&per_page={}&append=1&_=2018-08-29_13:37:36_03' \
+    def start_requests(self):
+        url = 'https://e27.co/startups'
+        for page in range(1, 33):
+            url += '/load_startups_ajax?all&per_page={}&append=1&_=2018-08-29_13:37:36_03' \
                                  ''.format(page)
             yield scrapy.Request(url, callback=self.page_parse)
 
@@ -21,8 +23,10 @@ class StartupSpider(scrapy.Spider):
         content = data['pagecontent'].strip()
         startups = Selector(text=content).xpath('//div[@class="startup-block"]')
         for startup in startups:
-            url = startup.xpath('.//a[1]/@href').extract_first() + '?json'
-            yield scrapy.Request(url, callback=self.parse_item)
+            if self.count < self.COUNT_MAX:
+                url = startup.xpath('.//a[1]/@href').extract_first() + '?json'
+                self.count += 1
+                yield scrapy.Request(url, callback=self.parse_item)
 
     def parse_item(self, response):
         item = StartupItem()
