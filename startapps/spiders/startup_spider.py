@@ -37,7 +37,7 @@ class StartupSpider(scrapy.Spider):
         item['request_url'] = response.url.replace('?json', '')
         item['request_company_url'] = header.xpath('.//a[1]/@href').extract_first()
         item['location'] = header.xpath('.//div[@class="mbt"]/span[3]/a/text()').extract_first()
-        item['tags'] = header.xpath('.//div[contains(@style, "word-wrap")]/span/a/text()').extract_first()
+        item['tags'] = header.xpath('.//div[contains(@style, "word-wrap")]/span/a/text()').extract()
         item['founding_date'] = header.xpath('.//p[contains(text(), "Founded:")]/span/text()').extract_first()
         item['urls'] = header.xpath('.//div[contains(@class, "socials")]/a/@href').extract()
         item['description_short'] = header.xpath('.//div[h1[@class="profile-startup"]]/div[1]/text()').extract_first()
